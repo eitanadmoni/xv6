@@ -296,6 +296,8 @@ fork(void)
   }
   np->sz = p->sz;
 
+  np->trace_mask = p->trace_mask;
+
   // copy saved user registers.
   *(np->trapframe) = *(p->trapframe);
 
@@ -321,6 +323,7 @@ fork(void)
   acquire(&np->lock);
   np->state = RUNNABLE;
   release(&np->lock);
+
 
   return pid;
 }
@@ -680,4 +683,19 @@ procdump(void)
     printf("%d %s %s", p->pid, state, p->name);
     printf("\n");
   }
+}
+
+
+uint64 find_nproc(void){
+  struct proc *p;
+  uint64 i = 0;
+  for(p = proc; p < &proc[NPROC]; p++){
+    if(p->state == UNUSED){
+      continue;
+    }
+    else{
+      i += 1;
+    }
+  }
+  return (uint64)i;
 }

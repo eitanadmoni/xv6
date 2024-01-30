@@ -58,6 +58,8 @@ testmem() {
   sinfo(&info);
     
   if (info.freemem != n-PGSIZE) {
+
+    printf("freemem: %d, procnum: %d\n", info.freemem, info.nproc);
     printf("FAIL: free mem %d (bytes) instead of %d\n", n-PGSIZE, info.freemem);
     exit(1);
   }
