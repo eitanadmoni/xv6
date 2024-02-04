@@ -93,8 +93,10 @@ walk(pagetable_t pagetable, uint64 va, int alloc)
     if(*pte & PTE_V) {
       pagetable = (pagetable_t)PTE2PA(*pte);
     } else {
-      if(!alloc || (pagetable = (pde_t*)kalloc()) == 0)
+      if(!alloc || (pagetable = (pde_t*)kalloc()) == 0){
+        //printf("aaa");
         return 0;
+      }
       memset(pagetable, 0, PGSIZE);
       *pte = PA2PTE(pagetable) | PTE_V;
     }
@@ -435,5 +437,33 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
     return 0;
   } else {
     return -1;
+  }
+}
+
+void vmprint(pagetable_t pagetable){
+  printf("page table %p\n", pagetable);
+  for(int i = 0; i < 512; i++){
+    pte_t pte = pagetable[i];
+    if((pte & PTE_V) && (pte & (PTE_R|PTE_W|PTE_X)) == 0){
+      // this PTE points to a lower-level page table.
+      uint64 child = PTE2PA(pte);
+      printf("..%d: pte %p pa %p\n", i, pte, child);
+      for(int j = 0; j < 512; j++){
+        pte_t pte_sec = ((pagetable_t)child)[j];
+        if((pte_sec & PTE_V) && (pte_sec & (PTE_R|PTE_W|PTE_X)) == 0){
+          // this PTE points to a lower-level page table.
+          uint64 child_sec = PTE2PA(pte_sec);
+          printf(".. ..%d: pte %p pa %p\n", j, pte_sec, child_sec);
+          for(int k = 0; k < 512; k++){
+            pte_t pte_thr = ((pagetable_t)child_sec)[k];
+            if((pte_thr & PTE_V)){
+              // this PTE points to a lower-level page table.
+              uint64 child_thr = PTE2PA(pte_thr);
+              printf(".. .. ..%d: pte %p pa %p\n", k, pte_thr, child_thr);
+            }
+          }
+        }
+      }
+    }
   }
 }
