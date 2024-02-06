@@ -1,0 +1,7 @@
+answers:
+speed-up:
+you can get the parent id faster like this.
+vmprint:
+0 contain kernel text and 2 contains kernel data
+the user can read and write page 1.
+the third to last page contain free memory.
