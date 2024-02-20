@@ -1,0 +1,7 @@
+answers:
+1. the function usertrap()
+2. 0x87f74000, the number represent the syscall that the proc exec
+3. the CPU was in user mode
+4. lw	s2,0(zero), the register s2
+5. because 0 is adress for null and not mapped
+
