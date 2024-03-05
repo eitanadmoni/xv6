@@ -67,6 +67,7 @@ sys_sleep(void)
     sleep(&ticks, &tickslock);
   }
   release(&tickslock);
+  backtrace();
   return 0;
 }
 
@@ -90,4 +91,33 @@ sys_uptime(void)
   xticks = ticks;
   release(&tickslock);
   return xticks;
+}
+
+uint64
+sys_sigalarm(void){
+  struct proc *p = myproc();
+  int n;
+  argint(0, &n);
+  uint64 handl;
+  argaddr(1, &handl);
+  p->alarm_interval = n;
+  p->handler_pointer = handl;
+  return 0;
+}
+
+uint64
+sys_sigreturn(void){
+  struct proc *p = myproc();
+  uint64 kernel_satp, kernel_sp, kernel_trap, kernel_hartid;
+  p->handl_return = 1;
+  kernel_satp = p->trapframe->kernel_satp;
+  kernel_sp = p->trapframe->kernel_sp;
+  kernel_trap = p->trapframe->kernel_trap;
+  kernel_hartid = p->trapframe->kernel_hartid;
+  *(p->trapframe) = *(p->last_trapframe);
+  p->trapframe->kernel_satp = kernel_satp;
+  p->trapframe->kernel_sp = kernel_sp;
+  p->trapframe->kernel_trap = kernel_trap;
+  p->trapframe->kernel_hartid = kernel_hartid;
+  return p->trapframe->a0;
 }
